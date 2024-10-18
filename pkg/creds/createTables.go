@@ -9,9 +9,9 @@ func CreateTables(db *sql.DB) error {
 	_, err := db.Exec(`
 		CREATE TABLE IF NOT EXISTS queue (
 			address string PRIMARY KEY,
-			vp string NOT NULL,
+			cred string NOT NULL,
 			time_created timestamp NOT NULL,
-			last_tried integer
+			last_tried timestamp
 		);
 	`)
 
@@ -33,6 +33,7 @@ func CreateTables(db *sql.DB) error {
 	_, err = db.Exec(`
 		CREATE TABLE IF NOT EXISTS exchanges (
 			id string PRIMARY KEY,
+			token string NOT NULL,
 			address string NOT NULL,
 			qr string NOT NULL,
 			link string NOT NULL,

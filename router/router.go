@@ -18,8 +18,8 @@ func AppRouter() *chi.Mux {
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:3000", "https://localhost:3000", "*"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token", "Card-Count", "Card-Max"},
-		ExposedHeaders:   []string{"Link", "Card-Count", "Card-Max"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		ExposedHeaders:   []string{"Link"},
 		AllowCredentials: false,
 		MaxAge:           300,
 	}))
@@ -30,19 +30,22 @@ func AppRouter() *chi.Mux {
 
 	fmt.Println("middleware active")
 
-	credsDB, err := db.InitDB("cards")
+	credsDB, err := db.InitDB("creds")
 	if err != nil {
-		log.Fatalf("failed to initialize cards db: %s", err)
+		log.Fatalf("failed to initialize creds db: %s", err)
 	}
 
-	fmt.Println("connected to cards db")
+	fmt.Println("connected to creds db")
 
+	fmt.Println("creating creds db tables")
+
+	creds.CreateTables(credsDB)
 	s := creds.CreateService(credsDB)
+	s.SetAllAvailable()
 
-	r.Route("/exchanges", func(r chi.Router) {
-		// r.Use(cards.GetCountMiddleware())
-		r.Get("/", s.HandleCheckExchange)
-		r.Post("/", s.HandlePostExchange)
+	r.Route("/exchange", func(r chi.Router) {
+		// r.Use(creds.GetCountMiddleware())
+		r.Get("/{address}", s.HandleGetExchange)
 	})
 
 	r.Route("/callback", func(r chi.Router) {
